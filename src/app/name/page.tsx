@@ -1,4 +1,9 @@
+"use client";
+import {useRouter} from "next/navigation";
+
 export default function NamePage() {
+
+    const router = useRouter();
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white">
@@ -15,7 +20,9 @@ export default function NamePage() {
 
                 <div className="flex justify-between">
                     
-                    <button className="flex items-center border-2 border-red-600 text-red-600 px-4 py-2 font-semibold hover:bg-red-50">
+                    <button 
+                    onClick={() => router.back()}
+                    className="flex items-center border-2 border-red-600 text-red-600 px-4 py-2 font-semibold hover:bg-red-50">
                         ← Back
                     </button>
                     <button className="flex items-center bg-red-600 text-white px-6 py-2 font-semibold hover:bg-red-700">
