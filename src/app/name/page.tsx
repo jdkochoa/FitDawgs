@@ -18,6 +18,12 @@ export default function NamePage() {
                     className="w-full border p-3 mb-4 text-lg"
                 />
 
+                <input
+                    type="text"
+                    placeholder="Last Name"
+                    className="w-full border p-3 mb-4 text-lg"
+                />
+
                 <div className="flex justify-between">
                     
                     <button 
