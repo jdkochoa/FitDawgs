@@ -6,7 +6,7 @@ export default function NamePage() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen flex items-start justify-center pt-32 bg-white">
+        <div className="min-h-screen flex items-start justify-center pt-10 bg-white">
             <div className="border-4 border-red-700 p-10 shadow-xl w-full max-w-md text-center">
 
                 <h1 className="text-2xl font-semibold mb-2">What is your first name?</h1>
