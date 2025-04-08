@@ -1,4 +1,10 @@
+"use client";
+import {useRouter} from "next/navigation";
+
 export default function SplashPage() {
+
+    const router = useRouter();
+
     return (
         <div
         style={{
@@ -19,7 +25,7 @@ export default function SplashPage() {
         </p>
         <button
         className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full text-xl flex items-center gap-2"
-        // onClick={() later add navigation to other side
+        //onClick={() => router.push("/name")}
         >
         Get Started
         <span className="material-icons">arrow_forward</span>
