@@ -25,7 +25,7 @@ export default function SplashPage() {
         </p>
         <button
         className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full text-xl flex items-center gap-2"
-        onClick={() => router.push("/name")}
+        //onClick={() => router.push("/name")}
         >
         Get Started
         <span className="material-icons">arrow_forward</span>
