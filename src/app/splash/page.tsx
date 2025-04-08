@@ -8,7 +8,6 @@ export default function SplashPage() {
   const goToSchedule = () => {
     router.push("/schedule");
   };
-
   return (
     <div
       style={{
