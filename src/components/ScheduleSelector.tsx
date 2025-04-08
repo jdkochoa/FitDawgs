@@ -23,7 +23,26 @@ export default function ScheduleSelector({ userId }: { userId: string }) {
     const fetchClassTimes = async () => {
       const res = await fetch("/api/classTime");
       const data = await res.json();
-      setClassTimeOptions(data);
+
+      const sortedData = data.sort((a: ClassTimeOption, b: ClassTimeOption) => {
+        const daysOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        const dayComparison = daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day);
+        if (dayComparison !== 0) return dayComparison;
+
+        // Currently I have start and end times as strings, so I am convert them to Date for listing
+        const parseTime = (time: string) => {
+          const [hour, minutePart] = time.split(":");
+          const [minute, period] = minutePart.split(" ");
+          let hour24 = parseInt(hour, 10);
+          if (period.toLowerCase() === "pm" && hour24 !== 12) hour24 += 12;
+          if (period.toLowerCase() === "am" && hour24 === 12) hour24 = 0;
+          return hour24 * 60 + parseInt(minute, 10); // Convert to total minutes
+        };
+      
+        return parseTime(a.start) - parseTime(b.start);
+      });
+
+      setClassTimeOptions(sortedData);
     };
 
     fetchClassTimes();
@@ -51,34 +70,54 @@ export default function ScheduleSelector({ userId }: { userId: string }) {
   };
 
   return (
-    <div style={{ paddingTop: "80px" }}>
-      {" "}
-      <h2>Select Your Class Times</h2>
+    <div>
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
         }}
+        className="text-left"
       >
-        {classTimeOptions.map(({ _id, day, start, end }) => (
-          <label key={_id} style={{ display: "block", marginBottom: "8px" }}>
-            <input
-              type="checkbox"
-              value={_id}
-              checked={selectedClassTimeIds.includes(_id)}
-              onChange={() => handleCheckboxChange(_id)}
-            />
-            {`${day} - ${start} to ${end}`}
-          </label>
-        ))}
-        <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full" type="submit">Save Schedule</button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+            <div key={day}>
+              <h3 className="text-xl font-semibold text-red-700 mb-4">{day}</h3>
+              {classTimeOptions
+                .filter((classTime) => classTime.day === day)
+                .map(({ _id, start, end }) => (
+                  <label
+                    key={_id}
+                    className="block mb-2 cursor-pointer hover:bg-red-50 p-2 rounded"
+                  >
+                    <input
+                      type="checkbox"
+                      value={_id}
+                      checked={selectedClassTimeIds.includes(_id)}
+                      onChange={() => handleCheckboxChange(_id)}
+                      className="mr-2"
+                    />
+                    {`${start} to ${end}`}
+                  </label>
+                ))}
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-between">
+          <button
+            onClick={goBackToHome}
+            type="button"
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-full"
+          >
+            Back to Home
+          </button>
+          <button
+            type="submit"
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full"
+          >
+            Save Schedule
+          </button>
+        </div>
       </form>
-      <button
-        onClick={goBackToHome}
-        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full"
-      >
-        Back to Home
-      </button>
     </div>
   );
 }
