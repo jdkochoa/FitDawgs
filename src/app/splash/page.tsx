@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 export default function SplashPage() {
   const router = useRouter();
 
-  const goToSchedule = () => {
-    router.push("/schedule");
+  const goToName = () => {
+    router.push("/name");
   };
+
   return (
     <div
       style={{
@@ -29,7 +30,7 @@ export default function SplashPage() {
       <button
         className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full text-xl flex items-center gap-2"
         // ===================Landon Mod to Katherine================
-        onClick={goToSchedule} // later add navigation to other side
+        onClick={goToName} // later add navigation to other side
         // ==========================================================
       >
         Get Started
