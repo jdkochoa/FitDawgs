@@ -6,7 +6,7 @@ export default function SplashPage() {
   const router = useRouter();
 
   const goToSchedule = () => {
-    router.push("/schedule");
+    router.push("/name");
   };
   return (
     <div
