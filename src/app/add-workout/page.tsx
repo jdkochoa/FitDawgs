@@ -1,7 +1,7 @@
 //add a new individual workout
 "use client";
 
-import AddWorkoutForm from "@/components/AddWorkoutForm";
+import AddWorkoutForm from "../../components/AddWorkoutForm";
 
 export default function AddWorkoutPage() {
   return (

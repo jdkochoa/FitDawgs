@@ -15,19 +15,19 @@ export default function AddWorkoutForm() {
     activities: "",
   });
 
-  // Handle input changes
+  // change handler for input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
+  // submit handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Log the data to the console
+    // for now log submitted data to console - later change to DB
     console.log("New Workout Submitted:", formData);
 
-    // Clear the form fields
+    // Cclear form data
     setFormData({
       day: "",
       week: "",
@@ -37,14 +37,13 @@ export default function AddWorkoutForm() {
       activities: "",
     });
 
-    // Navigate back to the calendar page
     router.push("/calendar");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Column 1 */}
+        {/* Col 1 */}
         <div className="space-y-4">
           <div>
             <label htmlFor="day" className="block text-left font-semibold mb-1">
@@ -109,7 +108,7 @@ export default function AddWorkoutForm() {
           </div>
         </div>
 
-        {/* Column 2 */}
+        {/* Col 2 */}
         <div className="space-y-4">
           <div>
             <label htmlFor="startTime" className="block text-left font-semibold mb-1">
@@ -159,7 +158,6 @@ export default function AddWorkoutForm() {
         </div>
       </div>
 
-      {/* Submit Button */}
       <button
         type="submit"
         className="w-full bg-red-600 text-white py-3 font-semibold hover:bg-red-700"
@@ -167,7 +165,6 @@ export default function AddWorkoutForm() {
         Add Workout
       </button>
 
-      {/* Return to Calendar Button */}
       <button
         type="button"
         onClick={() => router.push("/calendar")}
