@@ -6,16 +6,21 @@ import { useState, useEffect } from "react";
 
 export default function NavBar() {
   const router = useRouter();
-
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return sessionStorage.getItem("isLoggedIn") === "true";
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
-    // Listen for login event from Login page
-    const handleLoginEvent = () => {
+    // Check if running on the client
+    if (typeof window !== "undefined") {
       const loggedIn = sessionStorage.getItem("isLoggedIn") === "true";
       setIsLoggedIn(loggedIn);
+    }
+
+    // Listen for login event from Login page
+    const handleLoginEvent = () => {
+      if (typeof window !== "undefined") {
+        const loggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+        setIsLoggedIn(loggedIn);
+      }
     };
 
     window.addEventListener("login", handleLoginEvent);
@@ -26,7 +31,9 @@ export default function NavBar() {
   }, []);
 
   function handleLogout() {
-    sessionStorage.setItem("isLoggedIn", "false");
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("isLoggedIn", "false");
+    }
     setIsLoggedIn(false);
     router.push("/splash");
   }
