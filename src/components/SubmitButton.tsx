@@ -1,11 +1,18 @@
-import React from "react";
-import { useState } from "react";
+"use client";
 
-const SubmitButton = () => {
+import React from "react";
+import { useState, useEffect } from "react";
+
+interface SubmitButtonProps {
+  onSubmit: () => void;
+}
+
+const SubmitButton = ({ onSubmit }: SubmitButtonProps) => {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   function submitHandler() {
     setIsSubmitted(true);
+    onSubmit();
   }
 
   return (
