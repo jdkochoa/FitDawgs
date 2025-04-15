@@ -1,43 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, FormEvent } from "react";
+import { doCredentialLogin } from "../actions";
 import SubmitButton from "../../components/SubmitButton";
 import Link from "next/link";
 
 function LoginPage() {
+  const [error, setError] = useState<string>("");
   const router = useRouter();
 
-  // Set isLoggedIn from local storage (to persist the login state)
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return sessionStorage.getItem("isLoggedIn") === "true";
-  });
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    event.preventDefault();
 
-  /*
-Check whether the user is logged in.
+    try {
+      console.log("Submitting form...");
+      const formData = new FormData(event.currentTarget);
 
-If the user is logged in, redirect them to the profile page.
-If the user is not logged in, log in.
-*/
-  useEffect(() => {
-    if (isLoggedIn) {
-      router.push("/profile");
+      const response = await doCredentialLogin(formData);
+
+      if (response?.error) {
+        console.error(response.error);
+        setError(response.error.message || "An error occurred");
+      } else {
+        router.push("/profile");
+      }
+    } catch (e: any) {
+      console.error(e);
+      setError("Check your credentials");
     }
-  }, [isLoggedIn]);
-
-  function handleLogin() {
-    // Simulate the login process
-    setTimeout(() => {
-      sessionStorage.setItem("isLoggedIn", "true");
-
-      setIsLoggedIn(true);
-
-      // Dispatch a login event for Nav (this is for Nav to change from Log in to Log out)
-      const loginEvent = new Event("login");
-      window.dispatchEvent(loginEvent);
-
-      router.push("/profile");
-    }, 2000);
   }
 
   return (
@@ -48,13 +41,13 @@ If the user is not logged in, log in.
           Welcome back! <br />
           Please log in to continue.
         </p>
-
-        <form action="" className="space-y-6">
+        {error && <p className="text-red-600 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-6">
           <input
-            type="username"
-            name="username"
-            id="username"
-            placeholder="Username"
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Email"
             className="w-full border p-3 mb-4 text-lg"
             required
           />
@@ -76,10 +69,7 @@ If the user is not logged in, log in.
             >
               ← Back
             </button>
-            <SubmitButton
-              onSubmit={handleLogin}
-              className="px-6 py-2 w-auto" 
-            />
+            <SubmitButton />
           </div>
         </form>
 
