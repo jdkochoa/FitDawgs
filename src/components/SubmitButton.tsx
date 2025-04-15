@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 interface SubmitButtonProps {
   onSubmit: () => void;
+  className?: string;
 }
 
 const SubmitButton = ({ onSubmit }: SubmitButtonProps) => {
@@ -20,7 +21,7 @@ const SubmitButton = ({ onSubmit }: SubmitButtonProps) => {
       type="submit"
       disabled={isSubmitted}
       className={
-        "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
+        "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ${className}"
       }
       onClick={submitHandler}
     >
