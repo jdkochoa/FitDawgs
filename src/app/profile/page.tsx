@@ -71,7 +71,7 @@ export default function ProfilePage() {
               onClick={() => router.push("/calendar")}
               className="bg-white text-red-600 font-bold py-2 px-4 rounded shadow hover:bg-gray-100"
             >
-              Return to Calendar View
+              Calendar & Workout View
             </button>
 
             <button

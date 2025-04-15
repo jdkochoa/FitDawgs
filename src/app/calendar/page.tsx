@@ -138,13 +138,13 @@ export default function CalendarPage() {
       {/* Buttons at the bottom */}
       <div className="mt-8 flex gap-4">
         <button
-          onClick={() => (window.location.href = "/profile")}
+          onClick={() => router.push("/profile")}
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded"
         >
           View Profile and Workout Plan
         </button>
         <button
-          onClick={() => alert("Add Workout Day functionality coming soon!")}
+          onClick={() => router.push("/add-workout")}
           className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded"
         >
           Add Workout

@@ -8,11 +8,11 @@ export default function NamePage() {
     <div className="min-h-screen flex items-start justify-center pt-10 bg-white">
       <div className="border-4 border-red-700 p-10 shadow-xl w-full max-w-md text-center">
         <h1 className="text-2xl font-semibold mb-2">
-          What is your first name?
+          Sign up for FitDawgs here!
         </h1>
         <p className="mb-6">
           We are happy you are here. <br />
-          Let's get to know more about you.
+          Let’s get to know more about you.
         </p>
 
         <input
@@ -43,11 +43,15 @@ export default function NamePage() {
           <button
             onClick={() => router.back()}
             className="flex items-center border-2 border-red-600 text-red-600 px-4 py-2 font-semibold hover:bg-red-50"
-          ></button>
+          >
+            ← Back
+          </button>
           <button
-            onClick={() => router.push("/schedule")}
+            onClick={() => router.push("/profile")}
             className="flex items-center bg-red-600 text-white px-6 py-2 font-semibold hover:bg-red-700"
-          ></button>
+          >
+            Next →
+          </button>
         </div>
       </div>
     </div>
