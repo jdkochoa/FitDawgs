@@ -1,194 +1,254 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+type CustomSelectProps = {
+  options: string[];
+  selectedOptions: string[];
+  setSelectedOptions: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
+function CustomSelect({
+  options,
+  selectedOptions,
+  setSelectedOptions,
+}: CustomSelectProps) {
+  const handleClick = (option: string) => {
+    setSelectedOptions((prev) =>
+      prev.includes(option)
+        ? prev.filter((item) => item !== option)
+        : [...prev, option]
+    );
+  };
+
+  return (
+    <div className="border p-3 grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
+      {options.map((option) => (
+        <div
+          key={option}
+          onClick={() => handleClick(option)}
+          className={`p-2 cursor-pointer border ${
+            selectedOptions.includes(option)
+              ? "bg-red-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          {option}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function WorkoutForm() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    goal: "",
-    fitnessLevel: "",
-    preferences: "",
-    sessionDuration: "",
-    daysPerWeek: "",
-    planDuration: "",
-  });
+  const [goal, setGoal] = useState("");
+  const [fitnessLevel, setFitnessLevel] = useState("");
+  const [preferences, setPreferences] = useState<string[]>([]);
+  const [daysPerWeek, setDaysPerWeek] = useState("");
+  const [sessionDuration, setSessionDuration] = useState("");
+  const [planDurationWeeks, setPlanDurationWeeks] = useState("");
+  const [result, setResult] = useState<any>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Example of getting users workouts (only shows in console (use f12 to see console))
+  // ===================== BEGIN: inserted GET request =====================
+  useEffect(() => {
+    const fetchUserWorkoutPlans = async () => {
+      try {
+        //This will be used (or something similar) to get specific users
+        /*import { useSession } from "next-auth/react";
+        const { data: session } = useSession();
+        const userId = session?.user?.id;*/
+        const userId = "67f4563e32a1efe36468fe5a"; // hardcoded for now
+        const res = await fetch(`/api/userWorkoutPlan?userId=${userId}`);
+        const data = await res.json();
+        console.log("Fetched user workout plans:", data);
+      } catch (err) {
+        console.error("Error fetching user workout plans:", err);
+      }
+    };
+
+    fetchUserWorkoutPlans();
+  }, []);
+  // ===================== END: inserted GET request =====================
+
+  const handleSaveWorkoutPlan = async (planData: any) => {
+    try {
+      const res = await fetch("/api/workoutPlan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(planData),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        const savedPlanId = data._id; //This is specifically the id in interface of api/workoutPlan
+        console.log("WorkoutPlan POST returned data:", data);
+        console.log("Workout plan saved:", savedPlanId);
+
+        // Now save to userWorkoutPlans
+
+        //This will be used (or something similar) to get specific users
+        /*import { useSession } from "next-auth/react";
+        const { data: session } = useSession();
+        const userId = session?.user?.id;*/
+        const userId = "67f4563e32a1efe36468fe5a"; // Replace with actual logic
+        const userPlanRes = await fetch("/api/userWorkoutPlan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, workoutPlans: [savedPlanId] }),
+        });
+
+        const userPlanData = await userPlanRes.json();
+        if (!userPlanRes.ok) {
+          console.error(
+            "Failed to update userWorkoutPlan:",
+            userPlanData.message
+          );
+        } else {
+          console.log("User workout plans updated:", userPlanData.data);
+        }
+      } else {
+        console.error("Failed to save workout plan:", data.message);
+      }
+    } catch (err) {
+      console.error("Request error:", err);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (
-      !formData.goal ||
-      !formData.fitnessLevel ||
-      !formData.preferences ||
-      !formData.sessionDuration ||
-      !formData.daysPerWeek ||
-      !formData.planDuration
+      !goal ||
+      !fitnessLevel ||
+      preferences.length === 0 ||
+      !sessionDuration ||
+      !daysPerWeek ||
+      !planDurationWeeks
     ) {
       alert("Please fill out all fields.");
       return;
     }
 
-    console.log("Workout Plan Submitted:", formData);
-    router.push("/profile");
+    const requestData = {
+      goal: goal,
+      fitness_level: fitnessLevel,
+      preferences: preferences,
+      health_conditions: ["None"],
+      schedule: {
+        days_per_week: parseInt(daysPerWeek),
+        session_duration: parseInt(sessionDuration),
+      },
+      plan_duration_weeks: parseInt(planDurationWeeks),
+      lang: "en",
+    };
+
+    try {
+      const res = await fetch("/api/generateWorkoutPlan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      });
+
+      const data = await res.json();
+      setResult(data);
+
+      if (res.ok && data.result) {
+        await handleSaveWorkoutPlan(data.result);
+      } else {
+        console.error("Plan generation failed or returned no result.");
+      }
+    } catch (err) {
+      console.error("Error during generation:", err);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Column 1 ^grid there*/}
+        {/* Column 1 */}
         <div className="space-y-4">
-          <div>
-            <label htmlFor="goal" className="block text-left font-semibold mb-1">
-              Goal
-            </label>
-            <select
-              id="goal"
-              name="goal"
-              value={formData.goal}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select a goal</option>
-              <option>Build Muscle</option>
-              <option>Lose Weight</option>
-              <option>Increase Endurance</option>
-              <option>Improve Flexibility</option>
-              <option>Gain Strength</option>
-              <option>Enhance Athletic Performance</option>
-              <option>Tone and Sculpt</option>
-              <option>Improve Heart Health</option>
-              <option>Increase Mobility</option>
-              <option>Support Mental Health/Stress Relief</option>
-            </select>
-          </div>
+          <SelectField
+            label="Goal"
+            id="goal"
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            required
+            options={[
+              "Build Muscle",
+              "Lose Weight",
+              "Increase Endurance",
+              "Improve Flexibility",
+              "Gain Strength",
+              "Enhance Athletic Performance",
+              "Tone and Sculpt",
+              "Improve Heart Health",
+              "Increase Mobility",
+              "Support Mental Health/Stress Relief",
+            ]}
+          />
+
+          <SelectField
+            label="Fitness Level"
+            id="fitnessLevel"
+            value={fitnessLevel}
+            onChange={(e) => setFitnessLevel(e.target.value)}
+            required
+            options={["Beginner", "Intermediate", "Advanced"]}
+          />
 
           <div>
-            <label
-              htmlFor="fitnessLevel"
-              className="block text-left font-semibold mb-1"
-            >
-              Fitness Level
-            </label>
-            <select
-              id="fitnessLevel"
-              name="fitnessLevel"
-              value={formData.fitnessLevel}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select your fitness level</option>
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="preferences"
-              className="block text-left font-semibold mb-1"
-            >
-              Preferences
-            </label>
-            <select
-              id="preferences"
-              name="preferences"
-              value={formData.preferences}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select your preferences</option>
-              <option>Weight Training</option>
-              <option>Cardio</option>
-              <option>HIIT (High-Intensity Interval Training)</option>
-              <option>Yoga</option>
-              <option>Pilates</option>
-              <option>Bodyweight Workouts</option>
-              <option>CrossFit or Functional Fitness</option>
-              <option>Dance-Based Workouts (e.g., Zumba)</option>
-              <option>Running or Walking</option>
-              <option>Cycling or Spinning</option>
-            </select>
+            <label className="block font-semibold mb-1">Preferences</label>
+            <CustomSelect
+              options={[
+                "Weight Training",
+                "Cardio",
+                "HIIT (High-Intensity Interval Training)",
+                "Yoga",
+                "Pilates",
+                "Bodyweight Workouts",
+                "CrossFit or Functional Fitness",
+                "Dance-Based Workouts (e.g., Zumba)",
+                "Running or Walking",
+                "Cycling or Spinning",
+              ]}
+              selectedOptions={preferences}
+              setSelectedOptions={setPreferences}
+            />
           </div>
         </div>
 
         {/* Column 2 */}
         <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="sessionDuration"
-              className="block text-left font-semibold mb-1"
-            >
-              Daily Workout Duration (Minutes)
-            </label>
-            <select
-              id="sessionDuration"
-              name="sessionDuration"
-              value={formData.sessionDuration}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select session duration</option>
-              <option>30</option>
-              <option>60</option>
-              <option>90</option>
-              <option>120</option>
-            </select>
-          </div>
+          <SelectField
+            label="Daily Workout Duration (Minutes)"
+            id="sessionDuration"
+            value={sessionDuration}
+            onChange={(e) => setSessionDuration(e.target.value)}
+            required
+            options={["30", "60", "90", "120"]}
+          />
 
-          <div>
-            <label
-              htmlFor="daysPerWeek"
-              className="block text-left font-semibold mb-1"
-            >
-              Workouts Per Week
-            </label>
-            <select
-              id="daysPerWeek"
-              name="daysPerWeek"
-              value={formData.daysPerWeek}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select number of workouts per week</option>
-              {[...Array(7)].map((_, i) => (
-                <option key={i + 1}>{i + 1}</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            label="Workouts Per Week"
+            id="daysPerWeek"
+            value={daysPerWeek}
+            onChange={(e) => setDaysPerWeek(e.target.value)}
+            required
+            options={Array.from({ length: 7 }, (_, i) => (i + 1).toString())}
+          />
 
-          <div>
-            <label
-              htmlFor="planDuration"
-              className="block text-left font-semibold mb-1"
-            >
-              Plan Duration (Weeks)
-            </label>
-            <select
-              id="planDuration"
-              name="planDuration"
-              value={formData.planDuration}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select duration</option>
-              {[...Array(15)].map((_, i) => (
-                <option key={i + 1}>{i + 1}</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            label="Plan Duration (Weeks)"
+            id="planDuration"
+            value={planDurationWeeks}
+            onChange={(e) => setPlanDurationWeeks(e.target.value)}
+            required
+            options={Array.from({ length: 15 }, (_, i) => (i + 1).toString())}
+          />
         </div>
       </div>
 
@@ -198,6 +258,55 @@ export default function WorkoutForm() {
       >
         Create Workout Plan
       </button>
+
+      {result && (
+        <div className="mt-6 p-4 bg-gray-100 rounded">
+          <h2 className="text-lg font-bold mb-2">Generated Plan:</h2>
+          <pre className="text-sm overflow-x-auto">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </div>
+      )}
     </form>
+  );
+}
+
+type SelectFieldProps = {
+  label: string;
+  id: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  required?: boolean;
+  options: string[];
+};
+
+function SelectField({
+  label,
+  id,
+  value,
+  onChange,
+  required,
+  options,
+}: SelectFieldProps) {
+  return (
+    <div>
+      <label htmlFor={id} className="block font-semibold mb-1">
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={onChange}
+        className="w-full border p-3 text-lg"
+        required={required}
+      >
+        <option value="">Select {label.toLowerCase()}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
