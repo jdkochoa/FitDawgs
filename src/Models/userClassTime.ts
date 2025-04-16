@@ -5,10 +5,13 @@ interface IUserClassTime extends Document {
   classTimes: mongoose.Types.ObjectId[];
 }
 
-const userClassTimeSchema = new Schema<IUserClassTime>({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  classTimes: [{ type: Schema.Types.ObjectId, ref: "ClassTime" }],
-});
+const userClassTimeSchema = new Schema<IUserClassTime>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    classTimes: [{ type: Schema.Types.ObjectId, ref: "ClassTime" }],
+  },
+  { timestamps: true }
+);
 
 const UserClassTime: Model<IUserClassTime> =
   mongoose.models.UserClassTime ||
