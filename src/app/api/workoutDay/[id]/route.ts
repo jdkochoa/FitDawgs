@@ -5,9 +5,8 @@ import mongoose from "mongoose";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params: { id }  }: { params: { id: string } }
 ) {
-  const { id } = params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ message: "Invalid ID format" }, { status: 400 });

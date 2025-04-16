@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 export default function WorkoutCard({
+  _id,
   title,
   day,
   duration,
@@ -11,13 +12,14 @@ export default function WorkoutCard({
   onEdit,
   onDelete,
 }: {
+  _id: string;
   title: string;
   day: string;
   duration: string;
   time: string;
   details: string[];
   onEdit: () => void; //tbd
-  onDelete: () => void; //tbd
+  onDelete: (id: string) => void; //tbd
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -52,7 +54,7 @@ export default function WorkoutCard({
           Edit
         </button>
         <button
-          onClick={onDelete}
+          onClick={() => onDelete(_id)}
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
         >
           Delete

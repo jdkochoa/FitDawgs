@@ -62,6 +62,7 @@ export default function CalendarPage() {
         // Look at this in the website, use pay attention to the DB to see what
         // is being added and how
         const mappedWorkouts = exercises.map((dayBlock: any, i: number) => ({
+          _id: dayBlock._id,
           title: `Week ${Math.floor(i / 3) + 1} Workout ${(i % 3) + 1}`,
           day: dayBlock.day || "Monday",
           duration:
@@ -97,11 +98,7 @@ export default function CalendarPage() {
       const res = await fetch(`/api/workoutDay/${id}`, {
         method: "DELETE",
       });
-  
-      if (!res.ok) {
-        throw new Error("Delete failed");
-      }
-  
+
       // Remove the deleted workout from the UI
       setWorkouts((prev) => prev.filter((w) => w._id !== id));
     } catch (err) {
@@ -133,13 +130,14 @@ export default function CalendarPage() {
             {workouts.map((workout, index) => (
               <WorkoutCard
                 key={index}
+                _id={workout._id}
                 title={workout.title}
                 day={workout.day}
                 duration={workout.duration}
                 time={workout.time}
                 details={workout.details}
-                onEdit={() => handleDelete(workout._id)}
-                onDelete={() => alert("Edit" + workout._id)}
+                onEdit={() => alert("Edit" + workout.title)}
+                onDelete={handleDelete}
               />
             ))}
           </div>
