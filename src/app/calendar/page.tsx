@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import WorkoutCard from "@/components/WorkoutCard";
+import { useRouter } from "next/navigation";
 
 export default function CalendarPage() {
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Fetching workout data...");
