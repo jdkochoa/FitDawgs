@@ -92,6 +92,23 @@ export default function CalendarPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/workoutDay/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) {
+        throw new Error("Delete failed");
+      }
+  
+      // Remove the deleted workout from the UI
+      setWorkouts((prev) => prev.filter((w) => w._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
       <h1 className="text-3xl font-semibold mb-6 text-red-700">My Workouts</h1>
@@ -121,8 +138,8 @@ export default function CalendarPage() {
                 duration={workout.duration}
                 time={workout.time}
                 details={workout.details}
-                onEdit={() => alert(`Edit ${workout.title}`)}
-                onDelete={() => alert(`Delete ${workout.title}`)}
+                onEdit={() => handleDelete(workout._id)}
+                onDelete={() => alert("Edit" + workout._id)}
               />
             ))}
           </div>
