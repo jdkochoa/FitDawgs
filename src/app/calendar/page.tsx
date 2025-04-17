@@ -98,8 +98,6 @@ export default function CalendarPage() {
       const res = await fetch(`/api/workoutDay/${id}`, {
         method: "DELETE",
       });
-
-      // Remove the deleted workout from the UI
       setWorkouts((prev) => prev.filter((w) => w._id !== id));
     } catch (err) {
       console.error(err);
@@ -136,7 +134,7 @@ export default function CalendarPage() {
                 duration={workout.duration}
                 time={workout.time}
                 details={workout.details}
-                onEdit={() => alert("Edit" + workout.title)}
+                onEdit={() => {}}
                 onDelete={handleDelete}
               />
             ))}

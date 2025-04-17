@@ -28,17 +28,16 @@ export default function WorkoutCard({
     title,
     day,
     duration,
-    startTime: "",
-    ampm: "AM",
+    startTime: "00:00",
     time: "",
   });
 
   const handleEditSubmit = async () => {
     try {
-      const res = await fetch(`/api/workoutPlan/update`, {
+      const res = await fetch(`/api/workoutDay/${_id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...editForm }), // Include the ID too if needed
+        body: JSON.stringify({ ...editForm }),
       });
       const result = await res.json();
       console.log("Updated workout:", result);
@@ -136,55 +135,26 @@ export default function WorkoutCard({
               </select>
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="duration" className="block text-gray-700 font-medium mb-2">
-                Workout Duration (Minutes)
-              </label>
-              <select
-                id="duration"
-                name="duration"
-                value={editForm.duration}
-                onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                className="w-full p-2 border rounded"
-                required
+
+            <div className="flex justify-between mt-auto">
+
+              <button
+                onClick={() => setIsEditOpen(false)}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               >
-                <option value="">Select duration</option>
-                <option>30</option>
-                <option>60</option>
-                <option>90</option>
-                <option>120</option>
-              </select>
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSubmit}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Save
+              </button>
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="duration" className="block text-gray-700 font-medium mb-2">
-                Start Time
-              </label>
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder=""
-                  value={editForm.startTime}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, startTime: e.target.value })
-                  }
-                  className="w-full p-2 border rounded"
-                />
-                <select
-                  value={editForm.ampm}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, ampm: e.target.value })
-                  }
-                  className="w-28 p-2 border rounded"
-                >
-                  <option value="AM">AM</option>
-                  <option value="PM">PM</option>
-                </select>
-              </div>
-              </div>
-            </div>
           </div>
-      )}
         </div>
-      );
+      )}
+    </div>
+  );
 }
