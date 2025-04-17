@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import connectMongoDB from "@/lib/mongodb";
-import User from "@/models/user";
+import User, { IUser } from "@/Models/user";
 
 export async function POST(request: NextRequest) {
   const { username, email, password, timestamps } = await request.json();
   await connectMongoDB();
-  await User.create({ username, email, password, timestamps });
+
+  const newUser = await User.create({ username, email, password, timestamps });
+
   return NextResponse.json(
-    { message: "User added successfully" },
+    {
+      message: "User added successfully",
+      userID: newUser.id.toString(),
+    },
     { status: 201 }
   );
 }
