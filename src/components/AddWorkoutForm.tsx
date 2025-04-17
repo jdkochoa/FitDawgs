@@ -8,10 +8,9 @@ export default function AddWorkoutForm() {
 
   const [formData, setFormData] = useState({
     day: "",
-    week: "",
     duration: "",
-    startTime: "",
-    endTime: "",
+    startTime: "", // not in the DB yet, but shows on the workout cards
+    endTime: "", // not in the Db yet, but shows on the workout cards
     activities: "",
   });
 
@@ -19,6 +18,8 @@ export default function AddWorkoutForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+
 
   // submit handler
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,12 +31,11 @@ export default function AddWorkoutForm() {
     // Need to have different input fields for exercises reps and sets if that is the case but idk
     const activitiesInput = formData.activities.split(",").map((activity) => ({
       name: activity.trim(),
-      duration: "N/A",
+      duration: `${formData.duration} minutes`,
       repetitions: "N/A",
       sets: "N/A",
       equipment: "None", // Or collect from user if needed
     }));
-
 
     const totalInformation = {
       day: formData.day,
@@ -54,7 +54,6 @@ export default function AddWorkoutForm() {
     // Clear form data
     setFormData({
       day: "",
-      week: "",
       duration: "",
       startTime: "",
       endTime: "",
@@ -92,48 +91,7 @@ export default function AddWorkoutForm() {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="week" className="block text-left font-semibold mb-1">
-              Week of the Plan
-            </label>
-            <select
-              id="week"
-              name="week"
-              value={formData.week}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select a week</option>
-              {[...Array(15)].map((_, i) => (
-                <option key={i + 1}>{`Week ${i + 1}`}</option>
-              ))}
-            </select>
-          </div>
 
-          <div>
-            <label htmlFor="duration" className="block text-left font-semibold mb-1">
-              Workout Duration (Minutes)
-            </label>
-            <select
-              id="duration"
-              name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            >
-              <option value="">Select duration</option>
-              <option>30</option>
-              <option>60</option>
-              <option>90</option>
-              <option>120</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Col 2 */}
-        <div className="space-y-4">
           <div>
             <label htmlFor="startTime" className="block text-left font-semibold mb-1">
               Start Time
@@ -143,21 +101,6 @@ export default function AddWorkoutForm() {
               id="startTime"
               name="startTime"
               value={formData.startTime}
-              onChange={handleChange}
-              className="w-full border p-3 text-lg"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="endTime" className="block text-left font-semibold mb-1">
-              End Time
-            </label>
-            <input
-              type="time"
-              id="endTime"
-              name="endTime"
-              value={formData.endTime}
               onChange={handleChange}
               className="w-full border p-3 text-lg"
               required
@@ -179,8 +122,50 @@ export default function AddWorkoutForm() {
               required
             />
           </div>
+
+
         </div>
-      </div>
+
+        {/* Col 2 */}
+        <div className="space-y-4">
+        <div>
+            <label htmlFor="duration" className="block text-left font-semibold mb-1">
+              Workout Duration (Minutes)
+            </label>
+            <select
+              id="duration"
+              name="duration"
+              value={formData.duration}
+              onChange={handleChange}
+              className="w-full border p-3 text-lg"
+              required
+            >
+              <option value="">Select duration</option>
+              <option>30</option>
+              <option>60</option>
+              <option>90</option>
+              <option>120</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="endTime" className="block text-left font-semibold mb-1">
+              End Time
+            </label>
+            <input
+              type="time"
+              id="endTime"
+              name="endTime"
+              value={formData.endTime}
+              onChange={handleChange}
+              className="w-full border p-3 text-lg"
+              required
+            />
+          </div>
+
+
+        </div>
+      </div >
 
       <button
         type="submit"
@@ -196,6 +181,6 @@ export default function AddWorkoutForm() {
       >
         Return to Calendar
       </button>
-    </form>
+    </form >
   );
 }

@@ -38,5 +38,11 @@ export async function PUT(request: NextRequest, context : { params: { id: string
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string }}) {
+  const { day, exercises } = await request.json(); 
+  await connectMongoDB();
+
+  const updatedPlan = await WorkoutPlan.findByIdAndUpdate(params.id, { $push: { exercises: { day, exercises, }, }, }, { new: true });
+
+  return NextResponse.json({ message: "Workout card added successfully", }, { status: 201 } );
 
 }
