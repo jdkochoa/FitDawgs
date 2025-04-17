@@ -34,7 +34,7 @@ export default function AddWorkoutForm() {
       duration: `${formData.duration} minutes`,
       repetitions: "N/A",
       sets: "N/A",
-      equipment: "None", // Or collect from user if needed
+      equipment: "None", 
     }));
 
     const totalInformation = {
