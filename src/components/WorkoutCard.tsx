@@ -21,7 +21,32 @@ export default function WorkoutCard({
   onEdit: () => void; //tbd
   onDelete: (id: string) => void; //tbd
 }) {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title,
+    day,
+    duration,
+    startTime: "",
+    ampm: "AM",
+    time: "",
+  });
+
+  const handleEditSubmit = async () => {
+    try {
+      const res = await fetch(`/api/workoutPlan/update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...editForm }), // Include the ID too if needed
+      });
+      const result = await res.json();
+      console.log("Updated workout:", result);
+      setIsEditOpen(false);
+    } catch (err) {
+      console.error("Error updating workout:", err);
+    }
+  };
 
   return (
     <div className="border-4 border-red-700 rounded-lg p-6 bg-white shadow-xl w-80 flex-shrink-0 mx-4 flex flex-col">
@@ -48,7 +73,7 @@ export default function WorkoutCard({
       {/* all the buttons here to edit/delete (NOT IMPLEMENTED YET) */}
       <div className="flex justify-between mt-auto">
         <button
-          onClick={onEdit}
+          onClick={() => setIsEditOpen(true)}
           className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
         >
           Edit
@@ -85,6 +110,81 @@ export default function WorkoutCard({
           </div>
         </div>
       )}
-    </div>
-  );
+
+      {/* Modal for edit details mode*/}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-2xl w-96">
+            <h2 className="text-xl font-semibold mb-4 text-red-700">{title}</h2>
+
+            <div className="mb-4">
+              <label htmlFor="day" className="block text-gray-700 font-medium mb-2">
+                Day
+              </label>
+              <select
+                id="day"
+                value={editForm.day}
+                onChange={(e) => setEditForm({ ...editForm, day: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select Day</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="duration" className="block text-gray-700 font-medium mb-2">
+                Workout Duration (Minutes)
+              </label>
+              <select
+                id="duration"
+                name="duration"
+                value={editForm.duration}
+                onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
+                className="w-full p-2 border rounded"
+                required
+              >
+                <option value="">Select duration</option>
+                <option>30</option>
+                <option>60</option>
+                <option>90</option>
+                <option>120</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="duration" className="block text-gray-700 font-medium mb-2">
+                Start Time
+              </label>
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  placeholder=""
+                  value={editForm.startTime}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, startTime: e.target.value })
+                  }
+                  className="w-full p-2 border rounded"
+                />
+                <select
+                  value={editForm.ampm}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, ampm: e.target.value })
+                  }
+                  className="w-28 p-2 border rounded"
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+              </div>
+            </div>
+          </div>
+      )}
+        </div>
+      );
 }
