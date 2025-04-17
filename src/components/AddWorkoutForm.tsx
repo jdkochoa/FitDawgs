@@ -21,13 +21,37 @@ export default function AddWorkoutForm() {
   };
 
   // submit handler
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // for now log submitted data to console - later change to DB
-    console.log("New Workout Submitted:", formData);
+    const planId = "67fe76929ac558fd9e8773fd"; // NEED TO UPDATE THIS TO WORK DYNAMICALLY
 
-    // Cclear form data
+    // Need to see what the user should submit right now I only have it getting the name 
+    // Need to have different input fields for exercises reps and sets if that is the case but idk
+    const activitiesInput = formData.activities.split(",").map((activity) => ({
+      name: activity.trim(),
+      duration: "N/A",
+      repetitions: "N/A",
+      sets: "N/A",
+      equipment: "None", // Or collect from user if needed
+    }));
+
+
+    const totalInformation = {
+      day: formData.day,
+      exercises: activitiesInput,
+    };
+
+    const res = await fetch(`/api/workoutDay/${planId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(totalInformation),
+    });
+
+    const result = await res.json();
+    console.log("New Workout Added:", result);
+
+    // Clear form data
     setFormData({
       day: "",
       week: "",

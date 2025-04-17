@@ -94,14 +94,10 @@ export default function CalendarPage() {
   };
 
   const handleDelete = async (id: string) => {
-    try {
       const res = await fetch(`/api/workoutDay/${id}`, {
         method: "DELETE",
       });
       setWorkouts((prev) => prev.filter((w) => w._id !== id));
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   return (

@@ -36,3 +36,7 @@ export async function PUT(request: NextRequest, context : { params: { id: string
 
   return NextResponse.json({ message: "User updated" }, { status: 200 });
 }
+
+export async function POST(request: NextRequest, { params }: { params: { id: string }}) {
+
+}

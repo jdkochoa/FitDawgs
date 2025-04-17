@@ -27,13 +27,9 @@ export default function WorkoutCard({
   const [editForm, setEditForm] = useState({
     title,
     day,
-    duration,
-    startTime: "00:00",
-    time: "",
   });
 
   const handleEditSubmit = async () => {
-    try {
       const res = await fetch(`/api/workoutDay/${_id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -42,9 +38,6 @@ export default function WorkoutCard({
       const result = await res.json();
       console.log("Updated workout:", result);
       setIsEditOpen(false);
-    } catch (err) {
-      console.error("Error updating workout:", err);
-    }
   };
 
   return (
