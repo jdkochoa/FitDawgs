@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import WorkoutCard from "@/components/WorkoutCard";
+import { useRouter } from "next/navigation";
 
 export default function CalendarPage() {
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Fetching workout data...");
@@ -60,6 +62,7 @@ export default function CalendarPage() {
         // Look at this in the website, use pay attention to the DB to see what
         // is being added and how
         const mappedWorkouts = exercises.map((dayBlock: any, i: number) => ({
+          _id: dayBlock._id,
           title: `Week ${Math.floor(i / 3) + 1} Workout ${(i % 3) + 1}`,
           day: dayBlock.day || "Monday",
           duration:
@@ -90,6 +93,13 @@ export default function CalendarPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+      const res = await fetch(`/api/workoutDay/${id}`, {
+        method: "DELETE",
+      });
+      setWorkouts((prev) => prev.filter((w) => w._id !== id));
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
       <h1 className="text-3xl font-semibold mb-6 text-red-700">My Workouts</h1>
@@ -114,13 +124,14 @@ export default function CalendarPage() {
             {workouts.map((workout, index) => (
               <WorkoutCard
                 key={index}
+                _id={workout._id}
                 title={workout.title}
                 day={workout.day}
                 duration={workout.duration}
                 time={workout.time}
                 details={workout.details}
-                onEdit={() => alert(`Edit ${workout.title}`)}
-                onDelete={() => alert(`Delete ${workout.title}`)}
+                onEdit={() => {}}
+                onDelete={handleDelete}
               />
             ))}
           </div>
