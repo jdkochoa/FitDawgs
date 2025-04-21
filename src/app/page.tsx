@@ -6,5 +6,6 @@ import dynamic from "next/dynamic";
 const Splash = dynamic(() => import("./splash/page"));
 
 export default function Home() {
+  connectMongoDB();
   return <Splash />;
 }
