@@ -74,7 +74,7 @@ function LoginPage() {
         </form>
 
         <p className="mt-6">
-          <Link href="/name" className="text-red-600 hover:underline">
+          <Link href="/signup/name" className="text-red-600 hover:underline">
             Don't have an account? Sign up.
           </Link>
         </p>

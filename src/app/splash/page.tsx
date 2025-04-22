@@ -1,13 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function SplashPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   const goToSchedule = () => {
-    router.push("/name");
+    if (status === "loading") {
+      return;
+    }
+
+    if (status === "authenticated") {
+      router.push("/profile");
+    } else {
+      router.push("/signup/name");
+    }
   };
+
   return (
     <div
       style={{
