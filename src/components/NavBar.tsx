@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Session } from "next-auth";
-import { doLogout } from "@/app/actions";
+import { signOut } from "next-auth/react";
 
 interface NavBarProps {
   session: Session | null;
@@ -14,14 +14,14 @@ export default function NavBar({ session }: NavBarProps) {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<Boolean>(!!session?.user);
 
-  console.log("User session:", session);
+  console.log("User session (Nav):", session);
 
   useEffect(() => {
     setIsLoggedIn(!!session?.user);
   }, [session]);
 
   function handleLogout() {
-    doLogout();
+    signOut({ callbackUrl: "/" });
     setIsLoggedIn(!!session?.user);
   }
 

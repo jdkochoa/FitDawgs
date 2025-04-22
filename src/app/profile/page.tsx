@@ -21,7 +21,7 @@ export default function ProfilePage() {
       }
 
       try {
-        // Fetch user data
+        // get user data
         const userResponse = await fetch(`/api/user/${session.user.id}`);
         if (!userResponse.ok) {
           throw new Error("Failed to fetch user data");
@@ -29,7 +29,7 @@ export default function ProfilePage() {
         const user = await userResponse.json();
         setUserData(user);
 
-        // Fetch user workout plans
+        // get user workout plans
         const userWorkoutResponse = await fetch(
           `/api/userWorkoutPlan?userId=${session.user.id}`
         );
@@ -38,9 +38,9 @@ export default function ProfilePage() {
         }
         const userWorkoutData = await userWorkoutResponse.json();
 
-        // Get the first workout plan (if it exists)
+        // Get the first workout plan ONLY (if it exists)
         const firstWorkoutPlan = userWorkoutData.workoutPlans?.[0];
-        setWorkoutPlan(firstWorkoutPlan || null); // Set to null if no workout plan exists
+        setWorkoutPlan(firstWorkoutPlan || null); // Set to null if no w plan 
       } catch (err) {
         console.error(err);
         setError("Failed to load profile data");
@@ -61,7 +61,7 @@ export default function ProfilePage() {
         throw new Error("Failed to delete workout plan");
       }
 
-      // Remove the workout plan from the state
+      // Remove the workout plan from the state/db
       setWorkoutPlan(null);
     } catch (err) {
       console.error(err);

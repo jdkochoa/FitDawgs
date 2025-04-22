@@ -25,7 +25,7 @@ function LoginPage() {
         console.error(response.error);
         setError(response.error.message || "An error occurred");
       } else {
-        router.push("/profile");
+        window.location.href = "/profile";
       }
     } catch (e: any) {
       console.error(e);
