@@ -3,74 +3,128 @@
 import { useState, useEffect } from "react";
 import WorkoutCard from "@/components/WorkoutCard";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function CalendarPage() {
+  const { data: session, status } = useSession();
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
 
+  if (status === "loading") return <p>Loading...</p>;
+
   useEffect(() => {
-    console.log("Fetching workout data...");
+    const userId = session?.user?.id;
 
-    //This will be used (or something similar) to get specific users
-    /*  import { useSession } from "next-auth/react";
-    const { data: session } = useSession();
-    const userId = session?.user?.id;*/
-    const planId = "67fe76929ac558fd9e8773fd";
-    const userClass = "67f459aa82fa6fa47b198cbb";
+    const fetchFirstWorkoutPlanId = async () => {
+      const res = await fetch(`/api/userWorkoutPlan2?userId=${userId}`);
+      const data = await res.json();
+      return res.ok ? data.firstWorkoutPlanId : null;
+    };
 
-    //const classIds = array of classtime ids
+    const fetchClassTimeIds = async () => {
+      const res = await fetch(`/api/userClassTime?userId=${userId}`);
+      const data = await res.json();
+      return res.ok ? data.classTimes : [];
+    };
+
+    const fetchClassTimes = async () => {
+      const timeIds = await fetchClassTimeIds();
+
+      const classTimes = await Promise.all(
+        timeIds.map(async (id: string) => {
+          const res = await fetch(`/api/classTime/${id}`);
+          const data = await res.json();
+          return data.classTime;
+        })
+      );
+
+      const takenTimes = classTimes.map((item: any) => ({
+        day: item.day,
+        start: item.start,
+        end: item.end,
+      }));
+
+      console.log("Taken Times with Day:", takenTimes);
+      return takenTimes;
+    };
+
+    const toMinutes = (timeStr: string): number => {
+      const [hourStr, minutePart] = timeStr.toLowerCase().split(":");
+      const minutes = parseInt(minutePart);
+      const hour = parseInt(hourStr);
+      const isPM = timeStr.toLowerCase().includes("pm");
+
+      let hour24 = hour;
+      if (hour === 12) hour24 = isPM ? 12 : 0;
+      else hour24 = isPM ? hour + 12 : hour;
+
+      return hour24 * 60 + minutes;
+    };
+
+    const toTimeString = (minutes: number): string => {
+      const hour24 = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      const suffix = hour24 >= 12 ? "PM" : "AM";
+      const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+      return `${hour12}:${mins.toString().padStart(2, "0")} ${suffix}`;
+    };
+
+    const generateValidTime = (
+      takenTimes: { day: string; start: string; end: string }[],
+      targetDay: string
+    ): string => {
+      const takenRanges = takenTimes
+        .filter((t) => t.day === targetDay)
+        .map((t) => ({
+          start: toMinutes(t.start),
+          end: toMinutes(t.end),
+        }));
+
+      for (let m = 8 * 60; m <= 22 * 60; m += 60) {
+        const end = m + 60;
+        const conflict = takenRanges.some(
+          (t) => !(end <= t.start || m >= t.end)
+        );
+        if (!conflict) {
+          return `${toTimeString(m)} to ${toTimeString(end)}`;
+        }
+      }
+
+      return "6:00 AM to 7:00 AM";
+    };
 
     const fetchWorkoutData = async () => {
       try {
-        // Get the workout plan for use in populating cards
+        const planId = await fetchFirstWorkoutPlanId();
+        if (!planId) return console.error("No workout plan ID available");
+
         const res = await fetch(`/api/workoutPlan/${planId}`);
         const data = await res.json();
-
-        console.log("Workout plan data:", data);
         const exercises = data.exercises || [];
+        const daysPerWeek = data.schedule.days_per_week;
 
-        // For testing (use F12 while Fitdawgs tab active to see console)
-        //const jsonString = JSON.stringify(data);
-        //console.log("Workout plan JSON:", jsonString);
+        const takenTimes = await fetchClassTimes();
 
-        /*
-        Here is where logic will go for getting user class times
-        and setting the workouts at times that are not the user class times
-        this is to be done for the cards. A pseudo logic is below in comments
-        */
-        /*===================================================================
-        const res1 = await fetch(`/api/userClassTime/${userClass}`);
-        const data1 = await res1.json();
+        const mappedWorkouts = exercises.map((dayBlock: any, i: number) => {
+          const week = Math.floor(i / daysPerWeek) + 1;
+          const day = (i % daysPerWeek) + 1;
+          const title = `Week ${week} - Day ${day}`;
+          const workoutDay = dayBlock.day || "Monday"; // fallback to Monday
 
-        console.log("UserClass plan data:", data1);
-        const exercises1 = data1.exercises1 || [];
+          const availableTime = generateValidTime(takenTimes, workoutDay);
 
-        const jsonString1 = JSON.stringify(data1);
-        console.log("UserClass plan JSON:", jsonString1);
-        //======================
-        const res2 = await fetch(`/api/classTime/67f44fed6413f4d095ac3a40`); //classid[0], 1, 2 etc
-        const data2 = await res2.json();
-
-        console.log("ClassTime plan data:", data2);
-        const exercises2 = data2.exercises2 || [];
-
-        const jsonString2 = JSON.stringify(data2);
-        console.log("ClassTime plan JSON:", jsonString2);
-        //==============================================================*/
-        // Map the exercises to the structure for the workout cards
-        // Look at this in the website, use pay attention to the DB to see what
-        // is being added and how
-        const mappedWorkouts = exercises.map((dayBlock: any, i: number) => ({
-          _id: dayBlock._id,
-          title: `Week ${Math.floor(i / 3) + 1} Workout ${(i % 3) + 1}`,
-          day: dayBlock.day || "Monday",
-          duration:
-            "Duration:" +
-            dayBlock.exercises.map((e: any) => e.duration).join(", "), // Combine durations into a single string
-          time: "10:00 AM to 11:00 AM", // depending on card day and class day make time not equal to time in classtime
-          details: dayBlock.exercises.map((e: any) => e.name),
-        }));
+          return {
+            _id: dayBlock._id,
+            title: title,
+            day: workoutDay,
+            duration:
+              "Duration:" +
+              dayBlock.exercises.map((e: any) => e.duration).join(", "),
+            time: availableTime,
+            details: dayBlock.exercises.map((e: any) => e.name),
+          };
+        });
 
         setWorkouts(mappedWorkouts);
       } catch (err) {
@@ -94,10 +148,10 @@ export default function CalendarPage() {
   };
 
   const handleDelete = async (id: string) => {
-      const res = await fetch(`/api/workoutDay/${id}`, {
-        method: "DELETE",
-      });
-      setWorkouts((prev) => prev.filter((w) => w._id !== id));
+    const res = await fetch(`/api/workoutDay/${id}`, {
+      method: "DELETE",
+    });
+    setWorkouts((prev) => prev.filter((w) => w._id !== id));
   };
 
   return (
