@@ -22,8 +22,10 @@ export default function ProfilePage() {
     by updating the User schema.
   */
   const { data: session, status } = useSession();
-  console.log("Session Status:", status);
-  console.log("User Session:", session);
+
+  if (status === "loading") {
+    return <p>Loading...</p>; // or a skeleton UI
+  }
 
   // Mock user data for now
   const user = {
