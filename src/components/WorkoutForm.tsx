@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type CustomSelectProps = {
   options: string[];
@@ -42,6 +43,11 @@ function CustomSelect({
 }
 
 export default function WorkoutForm() {
+  const { data: session, status } = useSession();
+  
+    if (status === "loading") {
+      return <p>Loading...</p>; // or a skeleton UI
+    }
   const router = useRouter();
 
   const [goal, setGoal] = useState("");
@@ -57,11 +63,7 @@ export default function WorkoutForm() {
   useEffect(() => {
     const fetchUserWorkoutPlans = async () => {
       try {
-        //This will be used (or something similar) to get specific users
-        /*import { useSession } from "next-auth/react";
-        const { data: session } = useSession();
-        const userId = session?.user?.id;*/
-        const userId = "67f4563e32a1efe36468fe5a"; // hardcoded for now
+        const userId = session?.user?.id;
         const res = await fetch(`/api/userWorkoutPlan?userId=${userId}`);
         const data = await res.json();
         console.log("Fetched user workout plans:", data);
@@ -90,11 +92,7 @@ export default function WorkoutForm() {
 
         // Now save to userWorkoutPlans
 
-        //This will be used (or something similar) to get specific users
-        /*import { useSession } from "next-auth/react";
-        const { data: session } = useSession();
-        const userId = session?.user?.id;*/
-        const userId = "67f4563e32a1efe36468fe5a"; // Replace with actual logic
+        const userId = session?.user?.id;
         const userPlanRes = await fetch("/api/userWorkoutPlan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
