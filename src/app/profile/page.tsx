@@ -8,7 +8,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [userData, setUserData] = useState(null);
-  const [workoutPlans, setWorkoutPlans] = useState([]);
+  const [workoutPlan, setWorkoutPlan] = useState(null); // Only one workout plan
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -38,19 +38,9 @@ export default function ProfilePage() {
         }
         const userWorkoutData = await userWorkoutResponse.json();
 
-        // Fetch details for all workout plans
-        const workoutPlansDetails = await Promise.all(
-          userWorkoutData.workoutPlans.map(async (plan) => {
-            const planId = typeof plan === "string" ? plan : plan._id; // Extract _id if it's an object
-            const workoutPlanResponse = await fetch(`/api/workoutPlan/${planId}`);
-            if (!workoutPlanResponse.ok) {
-              throw new Error(`Failed to fetch workout plan details for ID: ${planId}`);
-            }
-            return await workoutPlanResponse.json();
-          })
-        );
-
-        setWorkoutPlans(workoutPlansDetails);
+        // Get the first workout plan (if it exists)
+        const firstWorkoutPlan = userWorkoutData.workoutPlans?.[0];
+        setWorkoutPlan(firstWorkoutPlan || null); // Set to null if no workout plan exists
       } catch (err) {
         console.error(err);
         setError("Failed to load profile data");
@@ -71,10 +61,8 @@ export default function ProfilePage() {
         throw new Error("Failed to delete workout plan");
       }
 
-      // Remove the deleted plan from the state
-      setWorkoutPlans((prevPlans) =>
-        prevPlans.filter((plan) => plan._id !== planId)
-      );
+      // Remove the workout plan from the state
+      setWorkoutPlan(null);
     } catch (err) {
       console.error(err);
       setError("Failed to delete workout plan");
@@ -105,53 +93,49 @@ export default function ProfilePage() {
             </h1>
             <p className="text-lg">
               Welcome back to FitDawgs. On your profile, you can view your
-              current workout plans here, or delete your current plans and add new ones!
+              current workout plan here, or delete your current plan and add a
+              new one!
             </p>
           </div>
         </div>
 
-        {workoutPlans.length > 0 ? (
-          workoutPlans.map((plan, index) => (
-            <div
-              key={index}
-              className="bg-red-600 text-white p-6 rounded-lg shadow-lg mb-6"
-            >
-              <h2 className="text-xl font-semibold mb-4">Workout Plan {index + 1}</h2>
-              <p className="mb-2">
-                <strong>Goal:</strong> {plan.goal}
-              </p>
-              <p className="mb-2">
-                <strong>Fitness Level:</strong> {plan.fitness_level}
-              </p>
-              <p className="mb-2">
-                <strong>Total Weeks:</strong> {plan.total_weeks}
-              </p>
-              <p className="mb-2">
-                <strong>Days per Week:</strong>{" "}
-                {plan.schedule?.days_per_week || "N/A"}
-              </p>
-              <p className="mb-2">
-                <strong>Session Duration:</strong>{" "}
-                {plan.schedule?.session_duration || "N/A"} minutes
-              </p>
+        {workoutPlan ? (
+          <div className="bg-red-600 text-white p-6 rounded-lg shadow-lg mb-6">
+            <h2 className="text-xl font-semibold mb-4">Your Workout Plan</h2>
+            <p className="mb-2">
+              <strong>Goal:</strong> {workoutPlan.goal}
+            </p>
+            <p className="mb-2">
+              <strong>Fitness Level:</strong> {workoutPlan.fitness_level}
+            </p>
+            <p className="mb-2">
+              <strong>Total Weeks:</strong> {workoutPlan.total_weeks}
+            </p>
+            <p className="mb-2">
+              <strong>Days per Week:</strong>{" "}
+              {workoutPlan.schedule?.days_per_week || "N/A"}
+            </p>
+            <p className="mb-2">
+              <strong>Session Duration:</strong>{" "}
+              {workoutPlan.schedule?.session_duration || "N/A"} minutes
+            </p>
 
-              <div className="flex justify-between">
-                <button
-                  onClick={() => router.push("/calendar")}
-                  className="bg-white text-red-600 font-bold py-2 px-4 rounded shadow hover:bg-gray-100"
-                >
-                  Calendar & Workout View
-                </button>
+            <div className="flex justify-between">
+              <button
+                onClick={() => router.push("/calendar")}
+                className="bg-white text-red-600 font-bold py-2 px-4 rounded shadow hover:bg-gray-100"
+              >
+                Calendar & Workout View
+              </button>
 
-                <button
-                  onClick={() => handleDelete(plan._id)}
-                  className="bg-white text-red-600 font-bold py-2 px-4 rounded shadow hover:bg-gray-100"
-                >
-                  Remove This Workout Plan
-                </button>
-              </div>
+              <button
+                onClick={() => handleDelete(workoutPlan._id)}
+                className="bg-white text-red-600 font-bold py-2 px-4 rounded shadow hover:bg-gray-100"
+              >
+                Remove This Workout Plan
+              </button>
             </div>
-          ))
+          </div>
         ) : (
           <div className="bg-red-600 text-white p-6 rounded-lg shadow-lg mb-6">
             <h2 className="text-xl font-semibold mb-4">No Workout Plan</h2>
@@ -160,9 +144,9 @@ export default function ProfilePage() {
         )}
 
         <div
-          onClick={() => workoutPlans.length === 0 && router.push("/new-workout")}
+          onClick={() => !workoutPlan && router.push("/new-workout")}
           className={`${
-            workoutPlans.length > 0 ? "bg-gray-400 cursor-not-allowed" : "bg-black"
+            workoutPlan ? "bg-gray-400 cursor-not-allowed" : "bg-black"
           } text-white p-6 rounded-lg shadow-lg text-center hover:bg-gray-800`}
         >
           <h2 className="text-xl font-semibold">Add a New Workout Plan</h2>

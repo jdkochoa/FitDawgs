@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
 
     if (!userWorkoutPlan) {
       return NextResponse.json(
-        { message: "No workout plans found for user" },
-        { status: 404 }
+        { workoutPlans: [] },
+        { status: 200 }
       );
     }
 
