@@ -3,39 +3,26 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Session } from "next-auth";
+import { doLogout } from "@/app/actions";
 
-export default function NavBar() {
+interface NavBarProps {
+  session: Session | null;
+}
+
+export default function NavBar({ session }: NavBarProps) {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<Boolean>(!!session?.user);
+
+  console.log("User session:", session);
 
   useEffect(() => {
-    // Check if running on the client
-    if (typeof window !== "undefined") {
-      const loggedIn = sessionStorage.getItem("isLoggedIn") === "true";
-      setIsLoggedIn(loggedIn);
-    }
-
-    // Listen for login event from Login page
-    const handleLoginEvent = () => {
-      if (typeof window !== "undefined") {
-        const loggedIn = sessionStorage.getItem("isLoggedIn") === "true";
-        setIsLoggedIn(loggedIn);
-      }
-    };
-
-    window.addEventListener("login", handleLoginEvent);
-
-    return () => {
-      window.removeEventListener("login", handleLoginEvent);
-    };
-  }, []);
+    setIsLoggedIn(!!session?.user);
+  }, [session]);
 
   function handleLogout() {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("isLoggedIn", "false");
-    }
-    setIsLoggedIn(false);
-    router.push("/splash");
+    doLogout();
+    setIsLoggedIn(!!session?.user);
   }
 
   function handleLogin() {

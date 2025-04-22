@@ -1,13 +1,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function ProfilePage() {
   const router = useRouter();
 
+  /*
+    This is how you retrieve the session data.
+    
+    The session is in the shape of: 
+
+    user: {
+      name: string
+      email: string,
+      id: string,
+    }
+
+    Keep in mind that since we are not storing the user name in
+    the database, we are retrieving the username. We can change this
+    by updating the User schema.
+  */
+  const { data: session, status } = useSession();
+  console.log("Session Status:", status);
+  console.log("User Session:", session);
+
   // Mock user data for now
   const user = {
-    firstName: "Katherine",
+    firstName: session?.user.name,
     profilePicture: "/images/profile.jpeg",
     workoutPlan: {
       goal: "Build Muscle",
@@ -39,8 +59,9 @@ export default function ProfilePage() {
               Hi {user.firstName}!
             </h1>
             <p className="text-lg">
-              Welcome back to FitDawgs. On your profile, you can view your current workout plan here, or
-              delete your current plan and add a new one!
+              Welcome back to FitDawgs. On your profile, you can view your
+              current workout plan here, or delete your current plan and add a
+              new one!
             </p>
           </div>
         </div>
@@ -54,7 +75,8 @@ export default function ProfilePage() {
             <strong>Fitness Level:</strong> {user.workoutPlan.fitnessLevel}
           </p>
           <p className="mb-2">
-            <strong>Preferences:</strong> {user.workoutPlan.preferences.join(", ")}
+            <strong>Preferences:</strong>{" "}
+            {user.workoutPlan.preferences.join(", ")}
           </p>
           <p className="mb-2">
             <strong>Time:</strong> {user.workoutPlan.time}
