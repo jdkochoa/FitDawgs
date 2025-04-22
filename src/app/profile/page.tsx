@@ -37,6 +37,7 @@ export default function ProfilePage() {
           throw new Error("Failed to fetch user workout plans");
         }
         const userWorkoutData = await userWorkoutResponse.json();
+        console.log("Fetched user workout plans:", userWorkoutData);
 
         // Get the first workout plan ONLY (if it exists)
         const firstWorkoutPlan = userWorkoutData.workoutPlans?.[0];
