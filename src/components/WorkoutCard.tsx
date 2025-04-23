@@ -1,6 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
+
+interface WorkoutCardProps {
+  _id: string;
+  title: string;
+  day: string;
+  duration: string;
+  time: string;
+  details: string[];
+  onEdit: () => void;
+  onDelete: (id: string) => void;
+  children: ReactNode; // This will be the image component
+}
 
 export default function WorkoutCard({
   _id,
@@ -11,17 +23,8 @@ export default function WorkoutCard({
   details,
   onEdit,
   onDelete,
-}: {
-  _id: string;
-  title: string;
-  day: string;
-  duration: string;
-  time: string;
-  details: string[];
-  onEdit: () => void; //tbd
-  onDelete: (id: string) => void; //tbd
-}) {
-
+  children,
+}: WorkoutCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -30,38 +33,31 @@ export default function WorkoutCard({
   });
 
   const handleEditSubmit = async () => {
-      const res = await fetch(`/api/workoutDay/${_id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...editForm }),
-      });
-      const result = await res.json();
-      console.log("Updated workout:", result);
-      setIsEditOpen(false);
+    const res = await fetch(`/api/workoutDay/${_id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...editForm }),
+    });
+    const result = await res.json();
+    console.log("Updated workout:", result);
+    setIsEditOpen(false);
   };
 
   return (
     <div className="border-4 border-red-700 rounded-lg p-6 bg-white shadow-xl w-80 flex-shrink-0 mx-4 flex flex-col">
       {/* Image is here but will later be replace by diff images per workout*/}
-      <img
-        src="/images/workout.webp"
-        alt="Workout"
-        className="w-full h-40 object-cover rounded-lg mb-4"
-      />
+      {children}
 
       <h2 className="text-xl font-semibold mb-1 text-red-700">{title}</h2>
       <p className="text-gray-600 mb-4 font-medium">{day}</p>
-
       <p className="text-gray-700 mb-1 font-medium">{duration}</p>
       <p className="text-gray-700 mb-4 font-medium">{time}</p>
-
       <button
         onClick={() => setIsModalOpen(true)}
         className="text-black hover:underline mb-4"
       >
         View Details
       </button>
-
       {/* all the buttons here to edit/delete (NOT IMPLEMENTED YET) */}
       <div className="flex justify-between mt-auto">
         <button
@@ -77,7 +73,6 @@ export default function WorkoutCard({
           Delete
         </button>
       </div>
-
       {/* Modal for view details mode*/}
       {isModalOpen && (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
@@ -102,7 +97,6 @@ export default function WorkoutCard({
           </div>
         </div>
       )}
-
       {/* Modal for edit details mode*/}
       {isEditOpen && (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
@@ -110,13 +104,18 @@ export default function WorkoutCard({
             <h2 className="text-xl font-semibold mb-4 text-red-700">{title}</h2>
 
             <div className="mb-4">
-              <label htmlFor="day" className="block text-gray-700 font-medium mb-2">
+              <label
+                htmlFor="day"
+                className="block text-gray-700 font-medium mb-2"
+              >
                 Day
               </label>
               <select
                 id="day"
                 value={editForm.day}
-                onChange={(e) => setEditForm({ ...editForm, day: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, day: e.target.value })
+                }
                 className="w-full p-2 border rounded"
               >
                 <option value="">Select Day</option>
@@ -128,9 +127,7 @@ export default function WorkoutCard({
               </select>
             </div>
 
-
             <div className="flex justify-between mt-auto">
-
               <button
                 onClick={() => setIsEditOpen(false)}
                 className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -144,7 +141,6 @@ export default function WorkoutCard({
                 Save
               </button>
             </div>
-
           </div>
         </div>
       )}
