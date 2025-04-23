@@ -9,8 +9,8 @@ interface WorkoutCardProps {
   duration: string;
   time: string;
   details: string[];
-  onEdit: () => void;
   onDelete: (id: string) => void;
+  onUpdate: (updatedWorkout: { _id: string; day: string }) => void; // New callback for updating the workout
   children: ReactNode; // This will be the image component
 }
 
@@ -21,8 +21,8 @@ export default function WorkoutCard({
   duration,
   time,
   details,
-  onEdit,
   onDelete,
+  onUpdate, // New callback prop
   children,
 }: WorkoutCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,24 +33,38 @@ export default function WorkoutCard({
   });
 
   const handleEditSubmit = async () => {
-    const res = await fetch(`/api/workoutDay/${_id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...editForm }),
-    });
-    const result = await res.json();
-    console.log("Updated workout:", result);
-    setIsEditOpen(false);
+    try {
+      const res = await fetch(`/api/workoutDay/${_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ day: editForm.day }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update workout");
+      }
+
+      const result = await res.json();
+      console.log("Updated workout:", result);
+
+      // Call the onUpdate callback to update the parent state
+      onUpdate({ _id, day: editForm.day });
+
+      // Close the edit modal
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error("Error updating workout:", error);
+    }
   };
 
   return (
     <div className="border-4 border-red-700 rounded-lg p-6 bg-white shadow-xl w-80 flex-shrink-0 mx-4 flex flex-col">
-      {/* Image is here but will later be replace by diff images per workout*/}
       {children}
 
       <h2 className="text-xl font-semibold mb-1 text-red-700">{title}</h2>
       <p className="text-gray-600 mb-4 font-medium">{day}</p>
-      <p className="text-gray-700 mb-1 font-medium">{duration}</p>
+      <p className="text-gray-700 mb-1 font-medium">1 Hour Workout</p>
+      <p className="text-gray-700 mb-1 font-medium">  --- </p>
       <p className="text-gray-700 mb-4 font-medium">{time}</p>
       <button
         onClick={() => setIsModalOpen(true)}
@@ -76,27 +90,35 @@ export default function WorkoutCard({
       {/* Modal for view details mode*/}
       {isModalOpen && (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-2xl w-96">
+            <div className="bg-white p-6 rounded-lg shadow-2xl w-96 max-h-[90vh] overflow-hidden">
             <h2 className="text-xl font-semibold mb-4 text-red-700">{title}</h2>
-            <p className="text-gray-600 mb-4">{day}</p>
-            <p className="text-gray-700 mb-1">{duration}</p>
-            <p className="text-gray-700 mb-4">{time}</p>
-            <ul className="text-left text-gray-800 mb-4 space-y-2">
-              {details.map((detail, index) => (
-                <li key={index} className="list-disc list-inside">
-                  {detail}
-                </li>
-              ))}
-            </ul>
+            <p className="text-gray-600 mb-4 font-medium">Day: {day}</p>
+            <p className="text-gray-700 mb-4 font-medium">Time: {time}</p>
+
+            <h3 className="text-lg font-semibold mb-2 text-gray-800">Workout Details:</h3>
+            <div className="overflow-y-auto max-h-64">
+                <ul className="text-left text-gray-800 mb-4 space-y-4">
+                {details.map((detail, index) => (
+                    <li key={index} className="border-b pb-2">
+                    <p className="font-semibold text-gray-700">Exercise: {detail.name}</p>
+                    <p>Duration: {detail.duration}</p>
+                    <p>Repetitions: {detail.repetitions}</p>
+                    <p>Sets: {detail.sets}</p>
+                    <p>Equipment: {detail.equipment}</p>
+                    </li>
+                ))}
+                </ul>
+            </div>
+
             <button
-              onClick={() => setIsModalOpen(false)}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
+                onClick={() => setIsModalOpen(false)}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full mt-4"
             >
-              Close
+                Close
             </button>
-          </div>
+            </div>
         </div>
-      )}
+        )}
       {/* Modal for edit details mode*/}
       {isEditOpen && (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">

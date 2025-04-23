@@ -118,11 +118,15 @@ export default function CalendarPage() {
             _id: dayBlock._id,
             title: title,
             day: workoutDay,
-            duration:
-              "Duration:" +
-              dayBlock.exercises.map((e: any) => e.duration).join(", "),
+            duration: "Duration: " + dayBlock.exercises.map((e: any) => e.duration).join(", "),
             time: availableTime,
-            details: dayBlock.exercises.map((e: any) => e.name),
+            details: dayBlock.exercises.map((e: any) => ({
+              name: e.name,
+              duration: e.duration || "N/A",
+              repetitions: e.repetitions || "N/A",
+              sets: e.sets || "N/A",
+              equipment: e.equipment || "None",
+            })),
           };
         });
 
@@ -145,6 +149,16 @@ export default function CalendarPage() {
     if (currentIndex < workouts.length - 3) {
       setCurrentIndex(currentIndex + 1);
     }
+  };
+  
+  const handleUpdateWorkout = (updatedWorkout: { _id: string; day: string }) => {
+    setWorkouts((prevWorkouts) =>
+      prevWorkouts.map((workout) =>
+        workout._id === updatedWorkout._id
+          ? { ...workout, day: updatedWorkout.day }
+          : workout
+      )
+    );
   };
 
   const handleDelete = async (id: string) => {
@@ -184,7 +198,7 @@ export default function CalendarPage() {
                 duration={workout.duration}
                 time={workout.time}
                 details={workout.details}
-                onEdit={() => {}}
+                onUpdate={handleUpdateWorkout}
                 onDelete={handleDelete}
               >
                 <img
