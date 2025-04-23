@@ -44,10 +44,6 @@ function CustomSelect({
 
 export default function WorkoutForm() {
   const { data: session, status } = useSession();
-  
-    if (status === "loading") {
-      return <p>Loading...</p>; // or a skeleton UI
-    }
   const router = useRouter();
 
   const [goal, setGoal] = useState("");
@@ -144,6 +140,8 @@ export default function WorkoutForm() {
       lang: "en",
     };
 
+    setLoading(true); // Set loading to true while generating the plan
+
     try {
       const res = await fetch("/api/generateWorkoutPlan", {
         method: "POST",
@@ -156,13 +154,20 @@ export default function WorkoutForm() {
 
       if (res.ok && data.result) {
         await handleSaveWorkoutPlan(data.result);
+        router.push("/profile"); // Redirect to profile page after saving
       } else {
         console.error("Plan generation failed or returned no result.");
       }
     } catch (err) {
       console.error("Error during generation:", err);
+    } finally {
+      setLoading(false); // Set loading to false after the process is complete
     }
   };
+
+  if (status === "loading") {
+    return <p>Loading...</p>; // or a skeleton UI
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -253,11 +258,12 @@ export default function WorkoutForm() {
       <button
         type="submit"
         className="w-full bg-red-600 text-white py-3 font-semibold hover:bg-red-700"
+        disabled={loading} // Disable the button while loading
       >
-        Create Workout Plan
+        {loading ? "Generating Plan..." : "Create Workout Plan"}
       </button>
 
-      {result && (
+      {result && !loading && (
         <div className="mt-6 p-4 bg-gray-100 rounded">
           <h2 className="text-lg font-bold mb-2">Generated Plan:</h2>
           <pre className="text-sm overflow-x-auto">
