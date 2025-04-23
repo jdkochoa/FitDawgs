@@ -146,6 +146,16 @@ export default function CalendarPage() {
       setCurrentIndex(currentIndex + 1);
     }
   };
+  
+  const handleUpdateWorkout = (updatedWorkout: { _id: string; day: string }) => {
+    setWorkouts((prevWorkouts) =>
+      prevWorkouts.map((workout) =>
+        workout._id === updatedWorkout._id
+          ? { ...workout, day: updatedWorkout.day }
+          : workout
+      )
+    );
+  };
 
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/workoutDay/${id}`, {
@@ -184,7 +194,7 @@ export default function CalendarPage() {
                 duration={workout.duration}
                 time={workout.time}
                 details={workout.details}
-                onEdit={() => {}}
+                onUpdate={handleUpdateWorkout}
                 onDelete={handleDelete}
               >
                 <img

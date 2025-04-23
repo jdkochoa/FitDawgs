@@ -9,8 +9,8 @@ interface WorkoutCardProps {
   duration: string;
   time: string;
   details: string[];
-  onEdit: () => void;
   onDelete: (id: string) => void;
+  onUpdate: (updatedWorkout: { _id: string; day: string }) => void; // New callback for updating the workout
   children: ReactNode; // This will be the image component
 }
 
@@ -21,8 +21,8 @@ export default function WorkoutCard({
   duration,
   time,
   details,
-  onEdit,
   onDelete,
+  onUpdate, // New callback prop
   children,
 }: WorkoutCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,19 +33,32 @@ export default function WorkoutCard({
   });
 
   const handleEditSubmit = async () => {
-    const res = await fetch(`/api/workoutDay/${_id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...editForm }),
-    });
-    const result = await res.json();
-    console.log("Updated workout:", result);
-    setIsEditOpen(false);
+    try {
+      const res = await fetch(`/api/workoutDay/${_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ day: editForm.day }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update workout");
+      }
+
+      const result = await res.json();
+      console.log("Updated workout:", result);
+
+      // Call the onUpdate callback to update the parent state
+      onUpdate({ _id, day: editForm.day });
+
+      // Close the edit modal
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error("Error updating workout:", error);
+    }
   };
 
   return (
     <div className="border-4 border-red-700 rounded-lg p-6 bg-white shadow-xl w-80 flex-shrink-0 mx-4 flex flex-col">
-      {/* Image is here but will later be replace by diff images per workout*/}
       {children}
 
       <h2 className="text-xl font-semibold mb-1 text-red-700">{title}</h2>
