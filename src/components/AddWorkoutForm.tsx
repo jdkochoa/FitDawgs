@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function AddWorkoutForm() {
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const userId = session?.user?.id;
+
+  const fetchFirstWorkoutPlanId = async () => {
+    const res = await fetch(`/api/userWorkoutPlan2?userId=${userId}`);
+    const data = await res.json();
+    return res.ok ? data.firstWorkoutPlanId : null;
+  };
 
   const [formData, setFormData] = useState({
     day: "",
@@ -25,7 +34,9 @@ export default function AddWorkoutForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const planId = "67fe76929ac558fd9e8773fd"; // NEED TO UPDATE THIS TO WORK DYNAMICALLY
+    const planId = await fetchFirstWorkoutPlanId();
+    if (!planId) return console.error("No workout plan ID available");
+    //const planId = "67fe76929ac558fd9e8773fd"; // NEED TO UPDATE THIS TO WORK DYNAMICALLY
 
     // Need to see what the user should submit right now I only have it getting the name 
     // Need to have different input fields for exercises reps and sets if that is the case but idk
