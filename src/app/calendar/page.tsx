@@ -118,11 +118,15 @@ export default function CalendarPage() {
             _id: dayBlock._id,
             title: title,
             day: workoutDay,
-            duration:
-              "Duration:" +
-              dayBlock.exercises.map((e: any) => e.duration).join(", "),
+            duration: "Duration: " + dayBlock.exercises.map((e: any) => e.duration).join(", "),
             time: availableTime,
-            details: dayBlock.exercises.map((e: any) => e.name),
+            details: dayBlock.exercises.map((e: any) => ({
+              name: e.name,
+              duration: e.duration || "N/A",
+              repetitions: e.repetitions || "N/A",
+              sets: e.sets || "N/A",
+              equipment: e.equipment || "None",
+            })),
           };
         });
 
