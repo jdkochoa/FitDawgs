@@ -186,7 +186,13 @@ export default function CalendarPage() {
                 details={workout.details}
                 onEdit={() => {}}
                 onDelete={handleDelete}
-              />
+              >
+                <img
+                  src={`/images/${workout.day.toLowerCase()}.jpg`}
+                  alt="Workout"
+                  className="w-full h-40 object-cover rounded-lg mb-4"
+                />
+              </WorkoutCard>
             ))}
           </div>
         </div>
